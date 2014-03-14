@@ -8,6 +8,7 @@ var expect = require("chai").expect;
 
 var MongoStore = require("../loop/stores/mongo");
 var MemoryStore = require("../loop/stores/memory");
+var DynamoStore = require("../loop/stores/dynamo");
 var getStore = require("../loop/stores").getStore;
 
 describe("Stores", function() {
@@ -135,7 +136,8 @@ describe("Stores", function() {
             });
           });
 
-          it("shouldn't send an error on partial duplicate", function(done) {
+          it("shouldn't send an error on partial duplicate",
+          function(done) {
             store.add({a: 1, b: 2}, function(err) {
               store.add({a: 1, b: 3}, function(err) {
                 expect(err).to.be.a("null");
@@ -244,6 +246,14 @@ describe("Stores", function() {
 
     testStore("MemoryStore", function createMemoryStore(options) {
       return new MemoryStore({}, options);
+    });
+
+    testStore("DynamoStore", function createDynamoStore(options) {
+      return new DynamoStore({
+        host: "localhost",
+        port: 4567,
+        tableName: "testColl2"
+      }, options);
     });
   });
 });
