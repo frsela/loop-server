@@ -21,31 +21,37 @@ module.exports = function DynamoStore(settings, options) {
 
   var _db,
       _setup,
-      _options = options || {unique: []},
+      _tableSchema,
+      _options = options || {},
       _settings = settings || {},
-  _tableName, _tableSchema;
-  var _maxCount = _settings.maxCount || 5;
+      _tableName = _options.tableName || _settings.tableName,
+      _maxCount = _settings.maxCount || 5;
 
-  if (!_settings.hasOwnProperty('tableName')) {
+  if (!_options.hasOwnProperty('unique')) {
+    _options.unique = [];
+  }
+
+  if (_tableName === undefined) {
     throw new Error("The tableName setting is required.");
   }
-  _tableName = _options.tableName || _settings.tableName;
-  _tableSchema = schemas[_settings.tableName];
+  _tableSchema = schemas[_tableName];
 
   if (!_settings.hasOwnProperty('region')) {
     if (!(_settings.hasOwnProperty('host') &&
           _settings.hasOwnProperty('port'))) {
       throw new Error("Either a region or a host, port settings are required.");
     } else {
+      var credentials = {
+        secretAccessKey: _settings.secretAccessKey || "fakeSecretAccessKey",
+        accessKeyId: _settings.accessKeyId || "fakeAccessKeyID"
+      };
+
       _db = dynamo.createClient({
         host: _settings.host,
         port: _settings.port,
         version: "20120810"
-      }, {
-        secretAccessKey: _settings.secretAccessKey || "fakeSecretAccessKey",
-        accessKeyId: _settings.accessKeyId || "fakeAccessKeyID"
-      });
-    } 
+      }, credentials);
+    }
   } else {
     var region = _settings.region;
 
@@ -145,9 +151,9 @@ module.exports = function DynamoStore(settings, options) {
 
     for (var key in record) {
       var key_type = typeof record[key];
-      
+
       item[key] = {};
-      
+
       switch (key_type) {
       case "string":
         item[key].S = record[key];
@@ -186,7 +192,7 @@ module.exports = function DynamoStore(settings, options) {
     get name() {
       return _settings.name;
     },
-    
+
     /**
      * Adds a single record to the collection.
      *
@@ -231,7 +237,7 @@ module.exports = function DynamoStore(settings, options) {
       });
     },
 
-    
+
     /**
      * Update all existing records matching the given criteria or create a
      * new one.
@@ -246,7 +252,7 @@ module.exports = function DynamoStore(settings, options) {
           cb(err);
           return;
         }
-        
+
         var keys;
         try {
           keys = dynamObject(criteria);
@@ -330,8 +336,7 @@ module.exports = function DynamoStore(settings, options) {
         cb(null, records[0]);
       });
     }.bind(this),
-    
-    
+
     /**
      * Drops current database.
      * @param  {Function} cb Callback(err)

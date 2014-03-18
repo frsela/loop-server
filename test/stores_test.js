@@ -85,7 +85,7 @@ describe("Stores", function() {
       describe("#add", function() {
         describe("without unique checks enabled", function() {
           beforeEach(function() {
-            store = createStore();
+            store = createStore({tableName: "testColl"});
           });
 
           it("should add a record to a given collection", function(done) {
@@ -109,7 +109,7 @@ describe("Stores", function() {
 
         describe("with unique checks enabled, single field", function() {
           beforeEach(function() {
-            store = createStore({unique: ["a"]});
+            store = createStore({unique: ["a"], tableName: "testColl"});
           });
 
           it("shouldn't allow storing duplicates", function(done) {
@@ -124,7 +124,7 @@ describe("Stores", function() {
 
         describe("with unique checks enabled, multiple field", function() {
           beforeEach(function() {
-            store = createStore({unique: ["a", "b"]});
+            store = createStore({unique: ["a", "b"], tableName: "testColl2"});
           });
 
           it("shouldn't allow storing duplicates", function(done) {
@@ -150,7 +150,7 @@ describe("Stores", function() {
 
       describe("#find", function() {
         beforeEach(function() {
-          store = createStore();
+          store = createStore({tableName: "testColl"});
         });
 
         it("should retrieve records out of a query object", function(done) {
@@ -192,7 +192,7 @@ describe("Stores", function() {
 
       describe("#findOne", function() {
         beforeEach(function() {
-          store = createStore();
+          store = createStore({tableName: "testColl"});
         });
 
         it("should retrieve a record out of a query object", function(done) {
@@ -217,7 +217,7 @@ describe("Stores", function() {
 
       describe("#drop", function() {
         beforeEach(function() {
-          store = createStore();
+          store = createStore({tableName: "testColl"});
         });
 
         it("should drop the database", function(done) {
@@ -251,8 +251,7 @@ describe("Stores", function() {
     testStore("DynamoStore", function createDynamoStore(options) {
       return new DynamoStore({
         host: "localhost",
-        port: 4567,
-        tableName: "testColl2"
+        port: 4567
       }, options);
     });
   });
